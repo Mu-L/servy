@@ -38,8 +38,11 @@ function Resolve-Tool {
     # 1. Check dynamic Environment Variable
     # Use Get-Item because $env:SERVY_TOOL_$Name is not valid syntax.
     $envVarName = "SERVY_TOOL_$Name"
-    $envPath = (Get-Item -Path "env:$envVarName" -ErrorAction SilentlyContinue).Value
-    if ($envPath -and (Test-Path -LiteralPath $envPath -PathType Leaf)) { return $envPath }
+    $envPath = (Get-Item -LiteralPath "env:$envVarName" -ErrorAction SilentlyContinue).Value
+    if ($envPath -and (Test-Path -LiteralPath $envPath -PathType Leaf)) {
+        Write-Verbose "Resolved '$Name' to '$envPath' via environment variable $envVarName."
+        return $envPath
+    }
     if ($envPath) {
         Write-Warning "$envVarName is set to '$envPath' but the file does not exist; ignoring."
     }
@@ -47,15 +50,20 @@ function Resolve-Tool {
     # 2. Check System PATH (Application only - avoid alias/function/script shadowing)
     $cmd = Get-Command $Name -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
     if ($cmd) {
+        Write-Verbose "Resolved '$Name' to '$($cmd.Source)' via PATH."
         return $cmd.Source   # Source is the canonical path property for Application commands
     }
 
     # 3. Check Fallbacks
     if ($Fallbacks) {
         foreach ($p in $Fallbacks) {
-            if (Test-Path -LiteralPath $p -PathType Leaf) { return $p }
+            if (Test-Path -LiteralPath $p -PathType Leaf) {
+                Write-Verbose "Resolved '$Name' to '$p' via fallback path."
+                return $p
+            }
         }
     }
 
-    throw "Required tool '$Name' not found. Please install it or set the '$envVarName' environment variable."
+    $searched = if ($Fallbacks) { " Searched PATH and: $($Fallbacks -join '; ')." } else { " Searched PATH." }
+    throw "Required tool '$Name' not found.$searched Install it or set the '$envVarName' environment variable."
 }
