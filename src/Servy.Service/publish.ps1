@@ -25,6 +25,7 @@
 [CmdletBinding()]
 param(
     [string]$Tfm                = "",
+    [ValidateSet('Debug', 'Release')]
     [string]$BuildConfiguration = "Release",
     [string]$Runtime            = "win-x64",
     [switch]$Pause

@@ -20,6 +20,7 @@ function Invoke-StandardPublish {
         [Parameter(Mandatory=$true)][string]$ProjectName,
         [Parameter(Mandatory=$true)][string]$Tfm,
         [string]$Runtime = "win-x64",
+        [ValidateSet('Debug', 'Release')]
         [string]$BuildConfiguration = "Release"
     )
 

@@ -112,6 +112,7 @@ function Invoke-BuildInstaller {
         [Parameter(Mandatory=$true)][string]$Version,
         [Parameter(Mandatory=$true)][string]$Tfm,
         [string]$Arch = "x64",
+        [ValidateSet('Debug', 'Release')]
         [string]$BuildConfiguration = "Release"
     )
 
